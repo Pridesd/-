@@ -2,16 +2,18 @@ import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Card, { CardTitle } from './Card.jsx';
 import { colors, colorAt, font } from '../styles/tokens.js';
-import { eok } from '../lib/format.js';
+import { won } from '../lib/format.js';
+import { groupTotal } from '../lib/derive.js';
 
+// 자산 "그룹(묶음)" 단위 구성 비중.
 export default function CompositionCard({ row, assetCats }) {
   const data = useMemo(() => {
     if (!row) return [];
     return assetCats
-      .map((c, i) => ({
-        key: c.key,
-        name: c.label,
-        value: Number(row.entry?.[c.key]) || 0,
+      .map((g, i) => ({
+        key: g.key,
+        name: g.label,
+        value: groupTotal(row.entry, g),
         color: colorAt(i),
       }))
       .filter((d) => d.value > 0);
@@ -32,7 +34,7 @@ export default function CompositionCard({ row, assetCats }) {
 
   return (
     <Card>
-      <CardTitle>자산 구성 · {row.month}</CardTitle>
+      <CardTitle>자산 구성 · {row.date}</CardTitle>
       <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ width: 150, height: 150, flexShrink: 0, margin: '0 auto' }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -73,8 +75,13 @@ export default function CompositionCard({ row, assetCats }) {
                   {d.name}
                 </span>
               </span>
-              <span style={{ fontSize: 14, color: colors.secondary, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                {((d.value / total) * 100).toFixed(1)}%
+              <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 13.5, color: colors.label, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                  {won(d.value)}
+                </span>
+                <span style={{ fontSize: 13, color: colors.secondary, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                  {((d.value / total) * 100).toFixed(0)}%
+                </span>
               </span>
             </li>
           ))}
@@ -103,7 +110,7 @@ function PieTip({ active, payload, total }) {
     >
       <div style={{ fontSize: 12, color: colors.secondary }}>{p.name}</div>
       <div style={{ fontSize: 14, fontWeight: 700, color: colors.label, fontVariantNumeric: 'tabular-nums' }}>
-        {eok(p.value)}만원 · {pct}%
+        {won(p.value)} · {pct}%
       </div>
     </div>
   );

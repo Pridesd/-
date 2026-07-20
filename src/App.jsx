@@ -11,7 +11,6 @@ import CompositionCard from './components/CompositionCard.jsx';
 import ChangeCard from './components/ChangeCard.jsx';
 import RecordsList from './components/RecordsList.jsx';
 import EntryForm from './components/EntryForm.jsx';
-import CategoryEditor from './components/CategoryEditor.jsx';
 
 store.initIfEmpty();
 
@@ -26,7 +25,7 @@ export default function App() {
   const [goal, setGoalState] = useState(() => store.getGoal());
   const [goalDate, setGoalDateState] = useState(() => store.getGoalDate());
 
-  const [editMonth, setEditMonth] = useState(null);
+  const [editDate, setEditDate] = useState(null);
   const [resetKey, setResetKey] = useState(0);
 
   const fileRef = useRef(null);
@@ -42,29 +41,29 @@ export default function App() {
   const persistCats = (c) => setCatsState(store.setCats(c));
 
   const saveEntry = (entry) => {
-    const others = entries.filter((e) => e.month !== entry.month);
+    const others = entries.filter((e) => e.date !== entry.date);
     persistEntries([...others, entry]);
-    setEditMonth(null);
+    setEditDate(null);
     setResetKey((k) => k + 1);
   };
 
-  const deleteEntry = (month) => {
-    if (!window.confirm(`${month} 기록을 삭제할까요?`)) return;
-    persistEntries(entries.filter((e) => e.month !== month));
-    if (editMonth === month) {
-      setEditMonth(null);
+  const deleteEntry = (date) => {
+    if (!window.confirm(`${date} 기록을 삭제할까요?`)) return;
+    persistEntries(entries.filter((e) => e.date !== date));
+    if (editDate === date) {
+      setEditDate(null);
       setResetKey((k) => k + 1);
     }
   };
 
-  const editEntry = (month) => {
-    setEditMonth(month);
+  const editEntry = (date) => {
+    setEditDate(date);
     setResetKey((k) => k + 1);
     if (formRef.current) formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const startNew = () => {
-    setEditMonth(null);
+    setEditDate(null);
     setResetKey((k) => k + 1);
   };
 
@@ -106,7 +105,7 @@ export default function App() {
         setCatsState(store.getCats());
         setGoalState(store.getGoal());
         setGoalDateState(store.getGoalDate());
-        setEditMonth(null);
+        setEditDate(null);
         setResetKey((k) => k + 1);
         window.alert('가져오기 완료');
       } catch {
@@ -128,7 +127,7 @@ export default function App() {
     setCatsState(store.getCats());
     updateGoal(0);
     updateGoalDate('');
-    setEditMonth(null);
+    setEditDate(null);
     setResetKey((k) => k + 1);
   };
 
@@ -183,20 +182,14 @@ export default function App() {
           <div ref={formRef}>
             <EntryForm
               entries={entries}
-              assetCats={cats.assets}
-              debtCats={cats.debts}
-              editMonth={editMonth}
+              cats={cats}
+              editDate={editDate}
               resetKey={resetKey}
               onSave={saveEntry}
               onNew={startNew}
+              onCatsChange={persistCats}
             />
           </div>
-
-          <CategoryEditor
-            assetCats={cats.assets}
-            debtCats={cats.debts}
-            onChange={persistCats}
-          />
 
           {/* 하단 */}
           <div style={{ marginTop: 8, textAlign: 'center' }}>

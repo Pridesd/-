@@ -1,7 +1,7 @@
 import { Trash2, ChevronRight } from 'lucide-react';
 import Card, { CardTitle } from './Card.jsx';
 import { colors } from '../styles/tokens.js';
-import { eok, signed } from '../lib/format.js';
+import { won, signed } from '../lib/format.js';
 
 export default function RecordsList({ rows, onEdit, onDelete }) {
   if (rows.length === 0) {
@@ -25,7 +25,7 @@ export default function RecordsList({ rows, onEdit, onDelete }) {
           const deltaColor = r.delta === null ? colors.tertiary : up ? colors.green : colors.red;
           return (
             <div
-              key={r.month}
+              key={r.date}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -35,7 +35,7 @@ export default function RecordsList({ rows, onEdit, onDelete }) {
               }}
             >
               <button
-                onClick={() => onEdit(r.month)}
+                onClick={() => onEdit(r.date)}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -51,7 +51,7 @@ export default function RecordsList({ rows, onEdit, onDelete }) {
                 }}
               >
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.label }}>{r.month}</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.label }}>{r.date}</div>
                   <div
                     style={{
                       fontSize: 12.5,
@@ -62,12 +62,12 @@ export default function RecordsList({ rows, onEdit, onDelete }) {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    자산 {eok(r.totalAssets)} · 부채 {eok(r.totalDebts)}
+                    자산 {won(r.totalAssets)} · 부채 {won(r.totalDebts)}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontSize: 16, fontWeight: 600, color: colors.label, fontVariantNumeric: 'tabular-nums' }}>
-                    {eok(r.net)}
+                    {won(r.net)}
                   </div>
                   <div style={{ fontSize: 12.5, color: deltaColor, fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
                     {r.delta === null ? '—' : `${signed(r.delta)}`}
@@ -76,8 +76,8 @@ export default function RecordsList({ rows, onEdit, onDelete }) {
                 <ChevronRight size={18} color={colors.tertiary} style={{ flexShrink: 0 }} />
               </button>
               <button
-                onClick={() => onDelete(r.month)}
-                aria-label={`${r.month} 삭제`}
+                onClick={() => onDelete(r.date)}
+                aria-label={`${r.date} 삭제`}
                 style={{
                   background: 'none',
                   border: 'none',

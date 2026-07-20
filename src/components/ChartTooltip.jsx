@@ -1,5 +1,5 @@
 import { colors, font } from '../styles/tokens.js';
-import { eok } from '../lib/format.js';
+import { won } from '../lib/format.js';
 
 // 흰 라운드 카드 툴팁 (옅은 블러/그림자).
 export default function ChartTooltip({ active, payload, label, valueLabel = '순자산' }) {
@@ -20,7 +20,7 @@ export default function ChartTooltip({ active, payload, label, valueLabel = '순
     >
       <div style={{ fontSize: 12, color: colors.secondary, marginBottom: 2 }}>{label}</div>
       <div style={{ fontSize: 15, fontWeight: 700, color: colors.label, fontVariantNumeric: 'tabular-nums' }}>
-        {valueLabel} {eok(v)}
+        {valueLabel} {won(v)}
       </div>
     </div>
   );

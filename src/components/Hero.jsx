@@ -12,12 +12,12 @@ import { ArrowUp, ArrowDown } from 'lucide-react';
 import Card from './Card.jsx';
 import ChartTooltip from './ChartTooltip.jsx';
 import { colors, bigNumber } from '../styles/tokens.js';
-import { eok, eokAxis, signed } from '../lib/format.js';
+import { comma, eokAxis, signed, fmtAxisDate } from '../lib/format.js';
 
 export default function Hero({ rows }) {
   const last = rows.length ? rows[rows.length - 1] : null;
   const data = useMemo(
-    () => rows.map((r) => ({ month: r.month, net: r.net })),
+    () => rows.map((r) => ({ date: r.date, net: r.net })),
     [rows],
   );
 
@@ -46,9 +46,9 @@ export default function Hero({ rows }) {
           wordBreak: 'keep-all',
         }}
       >
-        {eok(last.net)}
+        {comma(last.net)}
         <span style={{ fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 600, color: colors.secondary, marginLeft: 6, whiteSpace: 'nowrap' }}>
-          만원
+          원
         </span>
       </div>
 
@@ -56,7 +56,7 @@ export default function Hero({ rows }) {
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
           {up ? <ArrowUp size={18} color={deltaColor} /> : <ArrowDown size={18} color={deltaColor} />}
           <span style={{ fontSize: 16, fontWeight: 600, color: deltaColor, fontVariantNumeric: 'tabular-nums' }}>
-            {signed(last.delta)}만원
+            {signed(last.delta)}원
           </span>
           {last.deltaRate !== null && (
             <span style={{ fontSize: 16, fontWeight: 600, color: deltaColor, fontVariantNumeric: 'tabular-nums' }}>
@@ -64,7 +64,7 @@ export default function Hero({ rows }) {
               {(last.deltaRate * 100).toFixed(1)}%)
             </span>
           )}
-          <span style={{ fontSize: 14, color: colors.tertiary, marginLeft: 2 }}>지난달 대비</span>
+          <span style={{ fontSize: 14, color: colors.tertiary, marginLeft: 2 }}>직전 대비</span>
         </div>
       )}
 
@@ -79,9 +79,9 @@ export default function Hero({ rows }) {
             </defs>
             <CartesianGrid vertical={false} stroke={colors.separator} strokeDasharray="0" opacity={0.4} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tick={{ fontSize: 11, fill: colors.secondary }}
-              tickFormatter={(m) => String(m).slice(2).replace('-', '/')}
+              tickFormatter={fmtAxisDate}
               axisLine={false}
               tickLine={false}
               minTickGap={20}

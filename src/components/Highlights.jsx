@@ -43,7 +43,7 @@ export default function Highlights({ highlights }) {
               key={i}
               tone="blue"
               icon={<CalendarCheck size={15} />}
-              text={`최고 증가월 ${h.month} (${signed(h.delta)})`}
+              text={`최고 증가 ${h.date} (${signed(h.delta)})`}
             />
           );
         return null;

@@ -1,7 +1,7 @@
 import Card, { CardTitle } from './Card.jsx';
 import { colors, radius, font } from '../styles/tokens.js';
-import { eok, comma, addMonths, monthsBetween } from '../lib/format.js';
-import { recentAvgDelta } from '../lib/derive.js';
+import { won, comma, addMonths, monthsBetween, ymOf } from '../lib/format.js';
+import { monthlyAvgDelta } from '../lib/derive.js';
 import useIsNarrow from '../lib/useIsNarrow.js';
 
 const inputStyle = {
@@ -24,7 +24,7 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
   const isNarrow = useIsNarrow();
   const last = rows.length ? rows[rows.length - 1] : null;
   const net = last ? last.net : 0;
-  const avg = recentAvgDelta(rows, 4);
+  const avg = monthlyAvgDelta(rows); // 월 환산 평균 증감
 
   const hasGoal = goal > 0;
   const remaining = Math.max(0, goal - net);
@@ -38,7 +38,7 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
   let statusNode = null;
   if (hasGoal && !reached && last) {
     if (goalDate) {
-      const monthsLeft = monthsBetween(last.month, goalDate);
+      const monthsLeft = monthsBetween(ymOf(last.date), goalDate);
       if (monthsLeft <= 0) {
         statusNode = (
           <Note tone={colors.orange}>
@@ -52,11 +52,11 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
           <div style={{ marginTop: 12 }}>
             <Line>
               목표일({goalDate})까지 매달 약{' '}
-              <b style={{ color: colors.label }}>{comma(Math.ceil(needPerMonth))}만원</b> 필요
+              <b style={{ color: colors.label }}>{comma(Math.ceil(needPerMonth))}원</b> 필요
             </Line>
             {avg !== null && (
               <Line>
-                최근 저축 평균 <b style={{ color: colors.label }}>{comma(Math.round(avg))}만원</b> /월
+                최근 저축 평균 <b style={{ color: colors.label }}>{comma(Math.round(avg))}원</b> /월
               </Line>
             )}
             <div style={{ marginTop: 8 }}>
@@ -75,7 +75,7 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
       // 목표 날짜 없음 → 도달 예상
       if (avg !== null && avg > 0) {
         const months = Math.ceil(remaining / avg);
-        const eta = addMonths(last.month, months);
+        const eta = addMonths(ymOf(last.date), months);
         statusNode = (
           <Note tone={colors.secondary}>
             이 속도면 약 <b style={{ color: colors.label }}>{months}개월</b> 후 ·{' '}
@@ -98,12 +98,12 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr', gap: 12 }}>
         <div>
-          <label style={labelStyle}>목표 순자산 (만원)</label>
+          <label style={labelStyle}>목표 순자산 (원)</label>
           <input
             type="number"
             inputMode="numeric"
             value={goal || ''}
-            placeholder="예: 50000"
+            placeholder="예: 500000000"
             onChange={(e) => onGoal(e.target.value === '' ? 0 : Number(e.target.value))}
             style={inputStyle}
           />
@@ -133,7 +133,7 @@ export default function GoalCard({ rows, goal, goalDate, onGoal, onGoalDate }) {
               {reached ? '목표 달성 🎉' : `${pct.toFixed(1)}%`}
             </span>
             <span style={{ fontSize: 14, color: colors.secondary, fontVariantNumeric: 'tabular-nums' }}>
-              {reached ? `목표 ${eok(goal)}` : `남은 ${eok(remaining)}만원`}
+              {reached ? `목표 ${won(goal)}` : `남은 ${won(remaining)}`}
             </span>
           </div>
           <div

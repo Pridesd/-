@@ -1,14 +1,19 @@
-// 금액 단위는 "만원". eok()은 억 + 만 조합으로 표기한다.
+// 금액 단위는 "원". won()은 콤마 + "원"으로 표기한다.
 
 const safe = (n) => {
   const v = Number(n);
   return Number.isFinite(v) ? v : 0;
 };
 
-// 정수 콤마. (만원 단위 값)
+// 정수 콤마. (원 단위 값)
 export function comma(n) {
   const v = safe(n);
-  return v.toLocaleString('ko-KR');
+  return Math.round(v).toLocaleString('ko-KR');
+}
+
+// 원 단위 금액 표기 — 콤마 + "원". 음수/NaN 안전.
+export function won(n) {
+  return comma(n) + '원';
 }
 
 // 부호 표기 (+/-). 0은 부호 없음.
@@ -19,30 +24,10 @@ export function signed(n) {
   return comma(0);
 }
 
-// 만원 값을 "1억 8,430" 형태로. 음수/0/NaN 안전.
-export function eok(manwon) {
-  const v = Math.round(safe(manwon));
-  const neg = v < 0;
-  const abs = Math.abs(v);
-
-  const eokPart = Math.floor(abs / 10000);
-  const manPart = abs % 10000;
-
-  let out;
-  if (eokPart > 0 && manPart > 0) {
-    out = `${comma(eokPart)}억 ${comma(manPart)}`;
-  } else if (eokPart > 0) {
-    out = `${comma(eokPart)}억`;
-  } else {
-    out = comma(manPart);
-  }
-  return (neg ? '-' : '') + out;
-}
-
-// y축 라벨용 — "억" 단위 소수 1자리 (예: 1.8억). 만원 값 입력.
-export function eokAxis(manwon) {
-  const v = safe(manwon);
-  const e = v / 10000;
+// y축 라벨용 — "억" 단위 소수 1자리 (예: 1.8억). 원 값 입력.
+export function eokAxis(wonValue) {
+  const v = safe(wonValue);
+  const e = v / 1e8; // 1억 = 100,000,000원
   if (Math.abs(e) >= 100) return `${Math.round(e)}억`;
   // 소수 첫째자리, 불필요한 .0 제거
   const s = e.toFixed(1).replace(/\.0$/, '');
@@ -76,4 +61,20 @@ export function monthsBetween(a, b) {
 export function thisMonth() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// 오늘 "YYYY-MM-DD" (로컬 기준). 폼 기본값용.
+export function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// "YYYY-MM-DD" → "YYYY-MM" (월 단위 계산용)
+export function ymOf(date) {
+  return String(date).slice(0, 7);
+}
+
+// 차트 축 라벨용 — "YYYY-MM-DD" → "MM/DD"
+export function fmtAxisDate(date) {
+  return String(date).slice(5).replace('-', '/');
 }
