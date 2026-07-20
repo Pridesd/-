@@ -12,6 +12,9 @@ import ChangeCard from './components/ChangeCard.jsx';
 import RecordsList from './components/RecordsList.jsx';
 import EntryForm from './components/EntryForm.jsx';
 import CategoryEditor from './components/CategoryEditor.jsx';
+import HoldingsCard from './components/HoldingsCard.jsx';
+import TradeList from './components/TradeList.jsx';
+import TradeForm from './components/TradeForm.jsx';
 
 store.initIfEmpty();
 
@@ -26,11 +29,17 @@ export default function App() {
   const [goal, setGoalState] = useState(() => store.getGoal());
   const [goalDate, setGoalDateState] = useState(() => store.getGoalDate());
 
+  const [trades, setTradesState] = useState(() => store.getTrades());
+
   const [editMonth, setEditMonth] = useState(null);
   const [resetKey, setResetKey] = useState(0);
 
+  const [editTradeId, setEditTradeId] = useState(null);
+  const [tradeResetKey, setTradeResetKey] = useState(0);
+
   const fileRef = useRef(null);
   const formRef = useRef(null);
+  const tradeFormRef = useRef(null);
 
   // 파생값
   const rows = useMemo(() => deriveRows(entries, cats), [entries, cats]);
@@ -77,6 +86,38 @@ export default function App() {
     store.setGoalDate(d);
   };
 
+  // --- 주식 거래 ---
+  const persistTrades = (list) => setTradesState(store.setTrades(list));
+
+  const saveTrade = (trade) => {
+    const others = trades.filter((t) => t.id !== trade.id);
+    persistTrades([...others, trade]);
+    setEditTradeId(null);
+    setTradeResetKey((k) => k + 1);
+  };
+
+  const deleteTrade = (id) => {
+    const t = trades.find((x) => x.id === id);
+    const label = t ? `${t.date} ${t.ticker} ${t.side === 'sell' ? '매도' : '매수'}` : '이';
+    if (!window.confirm(`${label} 거래를 삭제할까요?`)) return;
+    persistTrades(trades.filter((x) => x.id !== id));
+    if (editTradeId === id) {
+      setEditTradeId(null);
+      setTradeResetKey((k) => k + 1);
+    }
+  };
+
+  const editTrade = (id) => {
+    setEditTradeId(id);
+    setTradeResetKey((k) => k + 1);
+    if (tradeFormRef.current) tradeFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const startNewTrade = () => {
+    setEditTradeId(null);
+    setTradeResetKey((k) => k + 1);
+  };
+
   // --- 내보내기 / 가져오기 / 전체삭제 ---
   const doExport = () => {
     const data = store.exportAll();
@@ -106,8 +147,11 @@ export default function App() {
         setCatsState(store.getCats());
         setGoalState(store.getGoal());
         setGoalDateState(store.getGoalDate());
+        setTradesState(store.getTrades());
         setEditMonth(null);
         setResetKey((k) => k + 1);
+        setEditTradeId(null);
+        setTradeResetKey((k) => k + 1);
         window.alert('가져오기 완료');
       } catch {
         window.alert('가져오기 실패: 올바른 JSON 파일이 아닙니다.');
@@ -126,10 +170,13 @@ export default function App() {
     store.setCats(store.getCats()); // getCats는 값이 없으면 defaultCats() 반환
     setEntriesState([]);
     setCatsState(store.getCats());
+    setTradesState(store.setTrades([]));
     updateGoal(0);
     updateGoalDate('');
     setEditMonth(null);
     setResetKey((k) => k + 1);
+    setEditTradeId(null);
+    setTradeResetKey((k) => k + 1);
   };
 
   useEffect(() => {
@@ -197,6 +244,22 @@ export default function App() {
             debtCats={cats.debts}
             onChange={persistCats}
           />
+
+          {/* ── 주식 거래 ── */}
+          <h2 style={{ margin: '18px 0 2px', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>
+            주식 거래
+          </h2>
+          <HoldingsCard trades={trades} />
+          <TradeList trades={trades} onEdit={editTrade} onDelete={deleteTrade} />
+          <div ref={tradeFormRef}>
+            <TradeForm
+              trades={trades}
+              editId={editTradeId}
+              resetKey={tradeResetKey}
+              onSave={saveTrade}
+              onNew={startNewTrade}
+            />
+          </div>
 
           {/* 하단 */}
           <div style={{ marginTop: 8, textAlign: 'center' }}>
