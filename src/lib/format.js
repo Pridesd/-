@@ -77,3 +77,9 @@ export function thisMonth() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
+
+// 오늘 날짜 "YYYY-MM-DD" (로컬 기준). 거래 입력 폼 기본값용.
+export function thisDay() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
